@@ -1,0 +1,119 @@
+.TH PCWEBADB 1 "2026-11-15" "pcwebadb 1.1.0" "User Commands"
+.SH NAME
+pcwebadb \- desktop ADB device manager inspired by sky adb
+.SH SYNOPSIS
+.B pcwebadb
+.RI [ \-port\  PORT ]
+.RI [ \-adb\  PATH ]
+.RI [ \-window\  MODE ]
+.RI [ \-no\-browser ]
+.RI [ \-headless ]
+.RI [ \-new\-instance ]
+.RI [ \-version ]
+.SH DESCRIPTION
+.B PC Web ADB (PWA)
+is a Linux desktop ADB client whose feature set and interaction model follow
+the GPL\-3.0 Android application
+.B sky adb
+(github.com/sky22333/skyadb).
+.PP
+By default it opens a standalone GTK3 window with an embedded WebKitGTK view:
+a normal application window with its own title bar and dock entry, no address
+bar and no browser tabs. Closing the window does NOT terminate the process:
+the window is hidden, the service keeps running in the background and a
+notification-area (system tray) icon appears. Left-clicking the icon or
+choosing "show main window" restores the window; only the tray's "quit" item,
+a termination signal or system shutdown stops the service. The loopback HTTP
+endpoint is an internal transport between the Go backend and that embedded
+view; it is bound to 127.0.0.1, checks the Host header and is never exposed
+to the LAN. A second GUI launch detects the running instance with
+.BR flock (2)
+and raises the existing window instead of starting a second service; this is
+also the recovery path on desktops that hide the system tray.
+.PP
+GTK3 and WebKitGTK are loaded with
+.BR dlopen (3)
+at runtime. If they are unavailable, the program falls back to a Chromium
+or Firefox
+.B --app
+style standalone window, then to the default browser, and finally to a
+service-only mode. None of these libraries is a hard link-time dependency.
+.PP
+Features include wireless\-debugging pairing and connection, LAN device
+discovery, recent devices, device information, application management,
+remote file browsing and transfer, screenshots, logcat, ADB shell, a
+virtual remote control, screen mirroring through
+.BR scrcpy (1),
+diagnostics and preferences.
+.PP
+An official Android SDK Platform Tools
+.B adb
+binary is bundled, so Android 11+ wireless pairing works without installing
+.B android\-sdk\-platform\-tools
+separately. Settings and recent devices are stored in
+.IR $XDG_CONFIG_HOME/pcwebadb/config.json .
+.SH OPTIONS
+.TP
+.BI \-port " PORT"
+Listen on a fixed loopback port instead of an automatically chosen one.
+.TP
+.BI \-adb " PATH"
+Use a specific adb executable. Also honours the
+.B SKYADB_ADB
+environment variable and the "custom adb path" setting.
+.TP
+.BI \-window " MODE"
+Select the Linux desktop shell.
+.B auto
+(the default) tries the native GTK/WebKit window, then a standalone browser
+window, then service-only mode;
+.B gtk
+requires the native window;
+.B browser
+starts a chrome-less Chromium/Firefox application window;
+.B none
+starts no UI at all.
+.TP
+.B \-headless
+Alias for
+.BR \-window=none .
+.TP
+.B \-no\-browser
+Do not open any UI; print the URL to the terminal and keep serving until
+Ctrl+C. Kept for compatibility with earlier releases.
+.TP
+.B \-new\-instance
+Skip the single-instance check and start an independent service on a separate
+port. Useful for debugging or running several fixed-port services at once.
+.TP
+.B \-version
+Print version information and exit.
+.SH ENVIRONMENT
+.TP
+.B SKYADB_ADB
+Override the adb executable path.
+.TP
+.B SKYADB_BROWSER
+Override the fallback browser command used in
+.B \-window=browser
+mode.
+.SH FILES
+.TP
+.I /usr/lib/pcwebadb/adb
+Bundled Android SDK Platform Tools adb 37.0.1.
+.TP
+.I /usr/share/applications/pcwebadb.desktop
+Desktop launcher (StartupWMClass=PCWebADB).
+.TP
+.I $XDG_CONFIG_HOME/pcwebadb/
+config.json (settings and recent devices), instance.lock / instance.addr
+(single-instance coordination) and tray\-icon.png (notification-area icon).
+.TP
+.I /usr/share/doc/pcwebadb/
+copyright, changelog, README.Debian, NOTICE.txt and source.tar.gz.
+.SH SEE ALSO
+.BR adb (1),
+.BR scrcpy (1)
+.SH LICENSE
+GPL\-3.0\-or\-later for the pcwebadb implementation; the bundled adb is
+distributed under Apache\-2.0 / the Android SDK License Agreement.

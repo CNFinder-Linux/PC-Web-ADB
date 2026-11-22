@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="PC Web ADB (PWA)">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5b95ff"/>
+      <stop offset="1" stop-color="#8a63ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="116" height="116" rx="28" fill="url(#g)"/>
+  <rect x="35" y="18" width="58" height="92" rx="12" fill="none" stroke="#ffffff" stroke-width="6"/>
+  <path d="M56 29h16" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".95"/>
+  <g stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".92">
+    <path d="M48 50h32"/>
+    <path d="M48 64h32"/>
+    <path d="M48 78h20"/>
+  </g>
+  <circle cx="64" cy="98" r="4.5" fill="#ffffff"/>
+</svg>

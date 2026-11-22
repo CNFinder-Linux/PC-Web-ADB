@@ -1,0 +1,99 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: pcwebadb
+Upstream-Contact: WorkBuddy <workbuddy@localhost>
+Source: https://github.com/sky22333/skyadb (design/feature reference)
+Comment:
+ PC Web ADB (PWA) is a NEW, independent Go/Web implementation for Linux desktops.
+ Its feature list, screen organisation and Chinese UI wording follow the
+ GPL-3.0 Android application "sky adb" (github.com/sky22333/skyadb,
+ main @ bbf01698880f3b09c40dd0672b297fe16fd70ef6, retrieved 2026-11-14).
+ No Kotlin/Java source, no Kadb code, no MIUIX code and no scrcpy-server
+ binary from the upstream project is compiled into or shipped with this
+ package. The upstream snapshot is kept in the source tree under
+ reference/skyadb/ solely as a documented design reference.
+ .
+ Because the work is a functional adaptation of a GPL-3.0 program, the
+ adaptation itself is released under GPL-3.0-or-later. The complete
+ corresponding source of the shipped binaries is included as
+ /usr/share/doc/pcwebadb/source.tar.gz.
+ .
+ The bundled `adb` binary is an unmodified copy from Google's Android SDK
+ Platform Tools 37.0.1. It is a separate, independently licensed program
+ distributed as an AGGREGATE alongside the GPL work (not a derivative work
+ of it); its own licence text is preserved in
+ /usr/share/doc/pcwebadb/NOTICE.txt. Apache-2.0 is GPLv3-compatible.
+ .
+ The Linux desktop window uses GTK3 and WebKitGTK from the host system.
+ These libraries are NOT shipped in this package and are NOT linked at
+ build time: the program resolves them with dlopen()/dlsym() at runtime
+ and falls back to a standalone browser window when they are unavailable.
+ Only libc/libdl/libpthread/libresolv are linked into the binary.
+ .
+ The application icons (packaging/pcwebadb-tray.png and
+ packaging/windows/pcwebadb.ico) are generated procedurally by
+ packaging/windows/make-icon.py from original geometry; no third-party
+ artwork is incorporated. They are covered by the GPL-3+ grant below.
+
+Files: *
+Copyright: 2026 WorkBuddy
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+Files: reference/skyadb/*
+Copyright: 2026 github.com/sky22333
+License: GPL-3
+ Upstream "sky adb" Android application, licensed under the GNU General
+ Public License version 3. Source obtained from
+ https://github.com/sky22333/skyadb at commit
+ bbf01698880f3b09c40dd0672b297fe16fd70ef6 (2026-11-14).
+ This snapshot is NOT installed by the binary .deb package; it is part of
+ the source tree for reference and licence auditing only.
+ .
+ On Debian systems, see "/usr/share/common-licenses/GPL-3".
+
+Files: usr/lib/pcwebadb/adb usr/share/doc/pcwebadb/NOTICE.txt
+Copyright: 2005-2026 The Android Open Source Project
+License: Apache-2.0 + Android-SDK
+ Android SDK Platform Tools, revision 37.0.1, downloaded from
+ https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+ (adb 1.0.41 / Version 37.0.1-15733141). Redistributed unmodified.
+ The third-party notices bundled by Google are reproduced verbatim in
+ /usr/share/doc/pcwebadb/NOTICE.txt.
+ .
+ Licensed under the Apache License, Version 2.0; you may not use these
+ files except in compliance with the License. On Debian systems the full
+ text is available in "/usr/share/common-licenses/Apache-2.0".
+ The Android SDK License Agreement additionally applies to the SDK
+ component; see <https://developer.android.com/studio/terms>.
+
+Files: vendor/platform-tools-win/adb.exe vendor/platform-tools-win/AdbWinApi.dll vendor/platform-tools-win/AdbWinUsbApi.dll vendor/platform-tools-win/NOTICE.txt
+Copyright: 2005-2026 The Android Open Source Project
+License: Apache-2.0 + Android-SDK
+ Android SDK Platform Tools, revision 34.0.4 (the last release supporting
+ Windows 7), downloaded unmodified from
+ https://dl.google.com/android/repository/platform-tools_r34.0.4-windows.zip
+ These files are go:embed compile-time inputs of adb_bundle_windows.go. They
+ are included in the source.tar.gz of this package (so the Windows build of
+ this same source tree is reproducible) and embedded in the Windows
+ executables, but are NOT installed into the Linux filesystem by this .deb.
+ They are separate programs distributed as an aggregate and are not covered
+ by the GPL grant for PC Web ADB (PWA) itself.
+ .
+ Licensed under the Apache License, Version 2.0; on Debian systems the full
+ text is available in "/usr/share/common-licenses/Apache-2.0". The Android
+ SDK License Agreement additionally applies; see
+ <https://developer.android.com/studio/terms>.

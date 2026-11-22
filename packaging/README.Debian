@@ -1,0 +1,79 @@
+PC Web ADB (PWA) for Debian / Ubuntu / Kylin
+=====================================
+
+1. 启动
+   从应用菜单点击「PC Web ADB (PWA)」，或在终端执行：
+
+       pcwebadb
+
+   程序会打开一个独立的 GTK3 原生窗口，界面由内嵌的 WebKitGTK 渲染：有
+   自己的标题栏与任务栏图标，没有地址栏、没有浏览器标签页。
+
+   **关闭窗口不会停止服务**：窗口只是隐藏，adb 与本地服务继续在后台运行，
+   通知区域（任务栏右侧）出现 PC Web ADB (PWA) 小图标。左键单击恢复窗口，右键菜单
+   可「显示主界面」或「退出 PC Web ADB (PWA)」；只有托盘菜单的退出、系统关机或
+   Ctrl+C 才真正结束进程。再次从应用菜单启动不会新开一个服务，而是直接
+   把已有窗口唤回来（单实例检测）。若桌面环境不显示系统托盘（如未装扩展
+   的 GNOME），用「再次启动」恢复窗口即可。
+
+   窗口与后端之间的通信走 127.0.0.1 回环接口，属于程序内部实现，不对外
+   提供网页服务。配置目录还会写入 instance.lock / instance.addr（单实例）
+   与 tray-icon.png（托盘图标）。
+
+   系统缺少 GTK3 / WebKitGTK 时会自动降级为 Chromium / Edge / Firefox 的
+   独立应用窗口（--app 模式），仍不会打开普通浏览器标签页。可用
+   --window 显式选择：
+
+       pcwebadb --window=gtk        # 只用原生窗口
+       pcwebadb --window=browser    # 只用独立浏览器应用窗口
+       pcwebadb --window=none       # 无界面，仅服务
+       pcwebadb --headless --port 18888
+       pcwebadb --new-instance      # 需要同时运行多个独立服务时
+
+   --window=none / --headless / --no-browser 适用于无图形会话或需要从
+   其它机器经 SSH 端口转发访问的场景；此时按 Ctrl+C 结束进程，这三种模式
+   不做单实例检测，便于多开。
+
+2. 连接设备
+   - USB：用数据线连接并在设备上允许 USB 调试，程序会自动列出设备。
+   - WiFi ADB：设备开启「开发者选项 → 无线调试」，在「设备连接」页
+     输入 IP 与端口（默认 5555）后点击「连接设备」。
+   - Android 11+ 首次无线连接：在「无线配对」页输入配对弹窗中的
+     IP / 配对端口 / 6 位配对码，配对成功后再连接。
+   - 「局域网发现」会扫描本机 /24 网段中开放 ADB 端口的主机并自动连接，
+     也可在「设置 → 扫描网段」里指定 CIDR（如 192.168.1.0/24）。
+
+3. 关于内置的 adb
+   本包附带 Android SDK Platform Tools 37.0.1 的 adb，路径为
+   /usr/lib/pcwebadb/adb。系统自带的 adb 若版本过旧（例如 1.0.39）
+   不支持 `adb pair`，因此默认优先使用内置版本。
+   adb 客户端与已运行的 adb server 版本不一致时，adb 会按自身设计
+   重启 server；如果本机有其他依赖旧 server 的工具，可通过
+   --adb /usr/bin/adb 或「设置 → 自定义 adb 路径」切换回去。
+   内置 adb 的第三方许可声明见 NOTICE.txt。
+
+4. 屏幕镜像
+   PC 端不内嵌手机端的 scrcpy-server，而是调用系统 scrcpy 打开独立窗口：
+
+       sudo apt install scrcpy
+
+   若未安装，镜像页会给出明确提示；其它功能不受影响。
+
+5. 权限与文件
+   - 配置与最近设备：~/.config/pcwebadb/config.json（0600）
+   - 上传/下载/安装产生的临时文件：/tmp/pcwebadb/（0700，用完即删）
+   - 诊断日志只保存在内存中，退出即清空。
+   - 内部通信仅监听回环地址，并校验 Host 头，不接受局域网远程访问。
+
+6. 源代码与许可
+   - 本实现：GPL-3.0-or-later，完整对应源码见同目录 source.tar.gz
+     （Go 源文件 + web/ 前端 + go.mod + 打包脚本 + 文档）。
+   - 参考项目：github.com/sky22333/skyadb，GPL-3.0，
+     固定版本 main @ bbf01698880f3b09c40dd0672b297fe16fd70ef6。
+     它是 Android/Kotlin 应用，不能被编译成 Debian 可执行文件；本包不含
+     其任何 Kotlin / Kadb / MIUIX / scrcpy-server 代码或二进制。
+   - 内置 adb：Android SDK Platform Tools 37.0.1，Apache-2.0 +
+     Android SDK License，见 NOTICE.txt。
+   完整机器可读版权信息见 copyright。
+
+ -- WorkBuddy <workbuddy@localhost>  Sun, 15 Nov 2026

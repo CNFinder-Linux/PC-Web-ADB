@@ -1,0 +1,38 @@
+// PC Web ADB (PWA) - PE resources for the Windows executables.
+//
+// Compiled to a COFF object (.syso) by packaging/windows/build-win.sh with the
+// mingw-w64 windres from the build sysroot; the Go linker links matching
+// *.syso files automatically, so no extra cgo or manifest is involved.
+//
+// Resource 1 is the application icon (Explorer file icon, taskbar, shortcuts,
+// Alt-Tab). It is the same pcwebadb.ico that the tray code turns into an
+// HICON at runtime via CreateIconFromResourceEx - one asset, two uses.
+// The VERSIONINFO block makes Windows Explorer show the proper product name,
+// version and description instead of a bare "SkyADBPC" file name.
+
+1 ICON "pcwebadb.ico"
+
+1 VERSIONINFO
+FILEVERSION     1,1,0,0
+PRODUCTVERSION  1,1,0,0
+FILEOS          0x40004L
+FILETYPE        0x1L
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "080404B0"
+    BEGIN
+      VALUE "ProductName",      "PC Web ADB (PWA)"
+      VALUE "FileDescription",  "PC 端 ADB 设备管理器"
+      VALUE "FileVersion",      "1.1.0.0"
+      VALUE "ProductVersion",   "1.1.0"
+      VALUE "OriginalFilename", "PCWebADB.exe"
+      VALUE "LegalCopyright",   "GPL-3.0-or-later; adb is Apache-2.0 / Android SDK"
+      VALUE "Comments",         "Feature set follows github.com/sky22333/skyadb (GPL-3.0)"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0804, 1200
+  END
+END
