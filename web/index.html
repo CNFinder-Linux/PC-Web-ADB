@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PC Web ADB (PWA) · ADB 设备管理</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">P<span>WA</span></div>
+      <div class="brand-text"><strong>PC Web ADB</strong><small>PWA · PC 桌面版</small></div>
+    </div>
+    <nav id="nav">
+      <div class="nav-label">连接</div>
+      <button class="nav-item active" data-view="devices"><i data-ico="devices"></i><span>设备连接</span></button>
+      <button class="nav-item" data-view="info"><i data-ico="info"></i><span>设备详情</span></button>
+      <div class="nav-label">管理</div>
+      <button class="nav-item" data-view="apps"><i data-ico="apps"></i><span>应用管理</span></button>
+      <button class="nav-item" data-view="files"><i data-ico="files"></i><span>文件管理</span></button>
+      <button class="nav-item" data-view="screenshot"><i data-ico="image"></i><span>设备截图</span></button>
+      <div class="nav-label">调试</div>
+      <button class="nav-item" data-view="logcat"><i data-ico="logs"></i><span>系统日志</span></button>
+      <button class="nav-item" data-view="shell"><i data-ico="shell"></i><span>Shell</span></button>
+      <button class="nav-item" data-view="remote"><i data-ico="remote"></i><span>虚拟遥控器</span></button>
+      <button class="nav-item" data-view="mirror"><i data-ico="mirror"></i><span>屏幕镜像</span></button>
+      <div class="nav-label">系统</div>
+      <button class="nav-item" data-view="diagnostics"><i data-ico="diag"></i><span>诊断日志</span></button>
+      <button class="nav-item" data-view="settings"><i data-ico="settings"></i><span>设置</span></button>
+    </nav>
+    <div class="side-foot">
+      <span id="adbVersionLabel">adb · 检测中</span>
+      <span title="关闭窗口不会停止服务；右键任务栏小图标可显示主界面或退出">关窗后台运行 · 托盘可退出</span>
+      <span>GPL-3.0 · 功能参考 skyadb</span>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="title-wrap"><h1 id="viewTitle">设备连接</h1><span id="viewSub" class="sub"></span></div>
+      <div class="top-actions">
+        <div class="device-picker">
+          <span class="dot" id="statusDot"></span>
+          <select id="deviceSelect" aria-label="当前设备"><option value="">未选择设备</option></select>
+        </div>
+        <button class="icon-btn" id="btnRefresh" title="刷新设备列表"><i data-ico="refresh"></i></button>
+        <button class="icon-btn" id="btnTheme" title="切换深浅色"><i data-ico="theme"></i></button>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ============ 设备连接 ============ -->
+      <section class="view active" data-view="devices">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-head"><h2>手动连接</h2><span class="badge">WiFi ADB</span></div>
+            <p class="hint">在目标设备开启「开发者选项 → 无线调试」，输入 IP 与 ADB 端口。</p>
+            <div class="form-row">
+              <label>IP 地址 / 主机名<input id="connHost" placeholder="192.168.1.20"></label>
+              <label class="w-sm">端口<input id="connPort" type="number" placeholder="5555"></label>
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" id="btnConnect">连接设备</button>
+              <button class="btn" id="btnDisconnect">断开当前</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>无线配对</h2><span class="badge">Android 11+</span></div>
+            <p class="hint">在「无线调试 → 使用配对码配对设备」中获取 6 位配对码，配对后再连接。</p>
+            <div class="form-row">
+              <label>设备 IP<input id="pairHost" placeholder="192.168.1.20"></label>
+              <label class="w-sm">配对端口<input id="pairPort" type="number" placeholder="37xxx"></label>
+            </div>
+            <div class="form-row">
+              <label>配对码<input id="pairCode" inputmode="numeric" maxlength="6" placeholder="6 位数字"></label>
+              <button class="btn primary align-end" id="btnPair">开始配对</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>局域网发现</h2><span class="badge">网段扫描</span></div>
+          <p class="hint">扫描本地 /24 网段中开放 ADB 端口的主机并自动连接；也可在设置中自定义网段。</p>
+          <div class="form-row">
+            <label>扫描网段（留空自动探测）<input id="scanRange" placeholder="例如 192.168.1.0/24"></label>
+            <label class="w-sm">端口<input id="scanPort" type="number" placeholder="5555"></label>
+            <button class="btn primary align-end" id="btnScan">扫描并连接</button>
+          </div>
+          <div id="scanResult" class="result-box muted">尚未扫描</div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-head"><h2>已连接设备</h2>
+              <span style="flex:1"></span>
+              <button class="text-btn" id="btnRecoverAdb" title="停止旧的 adb 服务并用内置 adb 重新启动（解决授权弹窗不出现、版本冲突、连接卡死）">重启 ADB 服务</button>
+              <button class="text-btn" id="btnRefreshDev">刷新</button></div>
+            <div id="deviceHint" class="hint-box" style="display:none"></div>
+            <div id="deviceList" class="list"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>最近设备</h2><button class="text-btn" id="btnClearRecent">清空</button></div>
+            <div id="recentList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 设备详情 ============ -->
+      <section class="view" data-view="info">
+        <div class="card">
+          <div class="card-head"><h2>设备信息</h2><button class="btn small" id="btnRefreshInfo">刷新信息</button></div>
+          <div id="infoGrid" class="info-grid"><div class="empty">选择设备后显示系统信息</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>快捷操作</h2></div>
+          <div class="quick-grid" id="quickGrid"></div>
+        </div>
+      </section>
+
+      <!-- ============ 应用管理 ============ -->
+      <section class="view" data-view="apps">
+        <div class="card">
+          <div class="card-head"><h2>应用列表</h2><span class="badge" id="appsCount">0 个</span></div>
+          <div class="form-row wrap">
+            <label class="grow">搜索应用<input id="appsSearch" placeholder="包名关键字"></label>
+            <label>筛选
+              <select id="appsKind"><option value="user">用户应用</option><option value="system">系统应用</option><option value="all">全部应用</option></select>
+            </label>
+            <button class="btn align-end" id="btnAppsRefresh">刷新列表</button>
+          </div>
+          <div class="table-wrap"><table class="tbl" id="appsTable">
+            <thead><tr><th>应用包名</th><th>类型</th><th>状态</th><th class="right">操作</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>安装 APK</h2><span class="badge">本地 / 在线</span></div>
+          <div class="form-row wrap">
+            <label class="grow">选择本地 APK<input type="file" id="apkFile" accept=".apk,application/vnd.android.package-archive"></label>
+            <button class="btn primary align-end" id="btnInstallApk">上传到设备安装</button>
+          </div>
+          <div class="form-row wrap">
+            <label class="grow">或输入 APK 下载链接<input id="apkUrl" placeholder="https://.../app.apk"></label>
+            <button class="btn align-end" id="btnInstallUrl">下载并安装</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 文件管理 ============ -->
+      <section class="view" data-view="files">
+        <div class="card">
+          <div class="card-head"><h2>设备文件</h2><span class="badge" id="filesCount">0 项</span></div>
+          <div class="form-row wrap">
+            <label class="grow">目录<input id="filesPath" value="/sdcard"></label>
+            <button class="btn align-end" id="btnFilesGo">跳转</button>
+            <button class="btn align-end" id="btnFilesUp">上级</button>
+            <button class="btn align-end" id="btnFilesRefresh">刷新</button>
+          </div>
+          <div class="form-row wrap">
+            <label class="grow">上传文件到当前目录<input type="file" id="uploadFile"></label>
+            <button class="btn primary align-end" id="btnUpload">上传</button>
+            <button class="btn align-end" id="btnMkdir">新建文件夹</button>
+          </div>
+          <div class="table-wrap"><table class="tbl" id="filesTable">
+            <thead><tr><th>名称</th><th>权限</th><th>大小</th><th>修改时间</th><th class="right">操作</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ============ 截图 ============ -->
+      <section class="view" data-view="screenshot">
+        <div class="card">
+          <div class="card-head"><h2>设备截图</h2>
+            <div class="btn-row"><button class="btn primary" id="btnShot">截取屏幕</button><button class="btn" id="btnShotSave">保存到本机</button></div>
+          </div>
+          <div id="shotBox" class="shot-box"><div class="empty">点击「截取屏幕」预览，确认后再保存</div></div>
+        </div>
+      </section>
+
+      <!-- ============ 系统日志 ============ -->
+      <section class="view" data-view="logcat">
+        <div class="card">
+          <div class="card-head"><h2>Logcat</h2><span class="badge" id="logState">未连接</span></div>
+          <div class="form-row wrap">
+            <label class="grow">过滤表达式（可选）<input id="logFilter" placeholder="例如 *:E 或 MyTag:V"></label>
+            <label class="w-sm">初始行数<input id="logLines" type="number" value="200"></label>
+            <button class="btn align-end" id="btnLogFetch">读取日志</button>
+            <button class="btn primary align-end" id="btnLogLive">开始实时</button>
+            <button class="btn align-end" id="btnLogCopy">复制</button>
+          </div>
+          <pre class="console" id="logOutput">等待读取…</pre>
+        </div>
+      </section>
+
+      <!-- ============ Shell ============ -->
+      <section class="view" data-view="shell">
+        <div class="card">
+          <div class="card-head"><h2>ADB Shell</h2><span class="badge">目标设备执行</span></div>
+          <div class="form-row">
+            <label class="grow">命令<input id="shellCmd" placeholder="例如 getprop ro.product.model"></label>
+            <button class="btn primary align-end" id="btnShellRun">执行</button>
+            <button class="btn align-end" id="btnShellClear">清空</button>
+          </div>
+          <div class="chips" id="shellPresets"></div>
+          <pre class="console" id="shellOutput">$ 等待命令…</pre>
+        </div>
+      </section>
+
+      <!-- ============ 遥控器 ============ -->
+      <section class="view" data-view="remote">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-head"><h2>虚拟遥控器</h2><span class="badge">input keyevent</span></div>
+            <p class="hint">适用于无触屏的电视 / 盒子，按钮直接向目标设备注入按键事件。</p>
+            <div class="dpad" id="dpad"></div>
+            <div class="btn-row center" id="mediaRow"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>输入文本</h2></div>
+            <p class="hint">向当前焦点输入框发送文本（不支持中文与特殊符号）。</p>
+            <div class="form-row"><label class="grow">文本内容<input id="inputText" placeholder="仅 ASCII 文本"></label><button class="btn primary align-end" id="btnInputText">发送</button></div>
+            <div class="card-head"><h2>常用按键</h2></div>
+            <div class="chips" id="keyChips"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 镜像 ============ -->
+      <section class="view" data-view="mirror">
+        <div class="card">
+          <div class="card-head"><h2>屏幕镜像</h2><span class="badge">scrcpy</span></div>
+          <p class="hint">PC 端通过系统安装的 scrcpy 打开独立镜像窗口（内嵌 scrcpy-server 是手机端实现，此处改为外部进程调用）。</p>
+          <div class="form-row">
+            <label>画质
+              <select id="mirrorQuality"><option value="smooth">流畅 (640)</option><option value="balanced" selected>均衡 (1024)</option><option value="high">高清 (1920)</option></select>
+            </label>
+            <button class="btn primary align-end" id="btnMirrorStart">启动镜像</button>
+            <button class="btn align-end" id="btnMirrorStop">停止镜像</button>
+          </div>
+          <div id="mirrorStatus" class="result-box muted">未启动</div>
+          <p class="hint">若提示未找到 scrcpy，请先执行 <code>sudo apt install scrcpy</code>，或直接用下面的内置预览。</p>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>内置预览</h2><span class="badge">免 scrcpy</span></div>
+          <p class="hint">直接抓取设备画面，按间隔刷新。帧率有限，适合确认画面、配合「虚拟遥控器」操作，不需要额外安装任何组件。</p>
+          <div class="form-row">
+            <label>刷新间隔
+              <select id="previewInterval"><option value="800">0.8 秒</option><option value="1500" selected>1.5 秒</option><option value="3000">3 秒</option></select>
+            </label>
+            <button class="btn primary align-end" id="btnPreviewStart">开始预览</button>
+            <button class="btn align-end" id="btnPreviewStop">停止预览</button>
+          </div>
+          <div id="previewStatus" class="result-box muted">未开始</div>
+          <div class="preview-wrap"><img id="mirrorPreview" alt="设备画面预览" /></div>
+        </div>
+      </section>
+
+      <!-- ============ 诊断 ============ -->
+      <section class="view" data-view="diagnostics">
+        <div class="card">
+          <div class="card-head"><h2>诊断日志</h2><div class="btn-row"><button class="btn small" id="btnDiagRefresh">刷新</button><button class="btn small" id="btnDiagClear">清空</button></div></div>
+          <p class="hint">记录连接与命令异常，便于排查网络、授权和功能问题。日志仅保存在内存中。</p>
+          <div class="table-wrap"><table class="tbl" id="diagTable"><thead><tr><th>时间</th><th>级别</th><th>操作</th><th>详情</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- ============ 设置 ============ -->
+      <section class="view" data-view="settings">
+        <div class="card">
+          <div class="card-head"><h2>偏好设置</h2><button class="btn primary small" id="btnSettingsSave">保存</button></div>
+          <div class="grid grid-2 settings-grid">
+            <label>默认 ADB 端口<input id="setPort" type="number"></label>
+            <label>连接超时（毫秒）<input id="setConnectTimeout" type="number"></label>
+            <label>命令超时（秒）<input id="setCommandTimeout" type="number"></label>
+            <label>扫描并发数<input id="setConcurrency" type="number"></label>
+            <label>扫描网段<input id="setRanges" placeholder="留空自动探测，多个用逗号分隔"></label>
+            <label>默认文件目录<input id="setFilesPath"></label>
+            <label>镜像画质<select id="setMirrorQuality"><option value="smooth">流畅</option><option value="balanced">均衡</option><option value="high">高清</option></select></label>
+            <label>主题模式<select id="setTheme"><option value="system">跟随系统</option><option value="dark">深色</option><option value="light">浅色</option></select></label>
+            <label class="span-2">自定义 adb 路径（可选）<input id="setAdbPath" placeholder="留空使用内置 adb"></label>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>关于</h2></div>
+          <div class="about" id="aboutBox"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast" class="toast-wrap"></div>
+<div id="modalBack" class="modal-back hidden">
+  <div class="modal">
+    <h3 id="modalTitle">确认</h3>
+    <p id="modalBody"></p>
+    <div class="modal-foot"><button class="btn" id="modalCancel">取消</button><button class="btn danger" id="modalOk">确定</button></div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

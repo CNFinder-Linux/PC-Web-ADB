@@ -1,0 +1,77 @@
+pcwebadb (1.1.0-1) unstable; urgency=high
+
+  * Product renamed to "PC Web ADB (PWA)" (package, binaries, window titles,
+    tray icon, desktop entry, icons). The GPL attribution to the upstream
+    skyadb Android app is unchanged.
+  * Windows: lock the OS thread in the launcher message loop. Without it the
+    Go scheduler could resume the GUI goroutine on another thread, freezing
+    the window (white, unresponsive). Also re-add the notification-area icon
+    when Explorer restarts (TaskbarCreated), so a hidden window can always be
+    restored, and make the single-instance mutex robust against stale
+    GetLastError values.
+  * All platforms: persistent run log at <config>/logs/pcwebadb.log with
+    panic reporting, so a GUI process that fails to start or crashes leaves
+    a trace instead of "nothing happens".
+  * New /api/recover endpoint and UI button: restarts the adb server and
+    re-attaches known wireless devices; fixes "server version doesn't match",
+    wedged servers and missing authorization prompts.
+  * adb errors are translated into actionable Chinese guidance
+    (unauthorized / offline / no permissions / version mismatch / ...).
+  * Device page now explains device states (unauthorized, offline) and, on
+    Windows, missing USB drivers, instead of showing an empty list.
+
+pcwebadb (1.0.0-2) unstable; urgency=high
+
+  * Fix a store deadlock that froze the whole server on the first
+    connect/pair from the UI: AddRecent() locked the store mutex and then
+    called Recent(), which re-locks the same non-reentrant mutex. Every
+    later /api/state request blocked forever, so the app looked dead.
+    Regression-tested in config_test.go.
+  * Fix screenshots on vendor ROMs whose screencap wrapper prints a banner
+    to stdout ("Init wrapper sys mutex successful", seen on Xiaomi TV):
+    locate the PNG signature instead of requiring it at offset 0, validate
+    the image (signature + IHDR + IEND), and fall back to device-side
+    capture + `adb pull` / CRLF repair. Broken frames now return an error
+    instead of a corrupt image/png response.
+  * Fix the file browser on toybox devices: `ls -l <symlink>` printed the
+    link itself, so /sdcard showed a single bogus row. Trailing slash
+    forces the dereference; ls exit codes no longer abort listing when
+    rows parse (root directories list fine despite unreadable entries).
+  * Downloading a directory returned HTTP 200 with an empty file; it is
+    now rejected with a clear message. System roots stay write-protected
+    but are browsable again.
+  * Discovery accepts single hosts (/32), always includes the local /24
+    and the subnets of remembered devices, and tries `adb mdns services`
+    first for Android 11+ wireless debugging with random ports. Pairing
+    now auto-connects the advertised data port.
+  * Mirror page adds a built-in low-fps screen preview (screenshot
+    polling) that works without scrcpy, plus clearer hint text.
+
+ -- PC Web ADB (PWA) Maintainers <maintainer@pcwebadb.invalid>  Mon, 16 Nov 2026 13:58:00 +0800
+
+pcwebadb (1.0.0-1) unstable; urgency=medium
+
+  * Initial Debian package.
+  * PC-side reimplementation of the sky adb (Android) feature set:
+    wireless pairing/connect, LAN discovery, recent devices, device info,
+    app management, file transfer, screenshot, logcat, shell, virtual remote,
+    screen mirror via scrcpy, diagnostics and settings.
+  * Bundles Android SDK Platform Tools adb 37.0.1 (wireless `adb pair`
+    support) so no system adb is required.
+  * Ships upstream reference information and complete corresponding source
+    for the Go/Web implementation under /usr/share/doc/pcwebadb/.
+  * Linux is now a native desktop application: a GTK3 window with an
+    embedded WebKitGTK view (dlopen'd at runtime, so GTK/WebKit are not
+    link-time dependencies). Standalone title bar and dock icon, no address
+    bar or browser tabs. Falls back to a chrome-less Chromium/Firefox
+    --app window, then to service-only mode (--window=none / --headless)
+    for headless hosts. StartupWMClass=PCWebADB matches the launcher;
+    WM_CLASS is set explicitly.
+  * Closing the window now hides it and keeps the service running in the
+    background, with a GtkStatusIcon notification-area icon (show / quit)
+    and flock-based single-instance detection. A second launch raises the
+    existing window via the loopback /api/raise endpoint. Windows 7 builds
+    use an equivalent Shell_NotifyIconW tray. --new-instance bypasses the
+    single-instance check.
+
+ -- WorkBuddy <workbuddy@localhost>  Sun, 15 Nov 2026 07:30:00 +0800

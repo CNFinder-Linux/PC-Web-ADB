@@ -1,0 +1,37 @@
+Source: pcwebadb
+Section: utils
+Priority: optional
+Maintainer: WorkBuddy <workbuddy@localhost>
+Build-Depends: golang-go (>= 1.20), gcc, libc6-dev
+Standards-Version: 4.6.2
+Homepage: https://github.com/sky22333/skyadb
+Rules-Requires-Root: no
+
+Package: pcwebadb
+Section: utils
+Priority: optional
+Maintainer: WorkBuddy <workbuddy@localhost>
+Homepage: https://github.com/sky22333/skyadb
+Architecture: amd64
+Depends: xdg-utils
+Recommends: libgtk-3-0, libwebkit2gtk-4.0-37 | libwebkit2gtk-4.1-0, scrcpy
+Suggests: chromium | google-chrome-stable | microsoft-edge-stable | firefox-esr, android-sdk-platform-tools
+Installed-Size: 20000
+Description: 桌面端 ADB 设备管理工具（参考 sky adb）
+ PC Web ADB (PWA) 是参考 GPL-3.0 Android 应用 sky adb (github.com/sky22333/skyadb)
+ 实现的 Linux 桌面版 ADB 客户端，界面与功能按其「设备详情页」组织。
+ .
+ 提供无线调试配对与连接、局域网设备发现、最近设备记录、设备信息、
+ 应用管理（列表 / 搜索 / 启动 / 停止 / 冻结 / 卸载 / 安装 APK）、
+ 设备文件管理（浏览 / 上传 / 下载 / 重命名 / 删除）、截图预览与保存、
+ Logcat 实时日志、ADB Shell、虚拟遥控器、屏幕镜像、诊断日志与偏好设置。
+ .
+ 从应用菜单启动即打开独立的 GTK3 原生窗口，界面由内嵌的 WebKitGTK 渲染，
+ 无地址栏、无浏览器标签页；关闭窗口后服务转入后台，通知区域小图标可恢复
+ 窗口或退出程序，再次启动会唤起已有窗口而不是新开一个服务。GTK/WebKit
+ 为运行时按需加载，缺少时自动降级为 Chromium/Firefox 的独立应用窗口或纯
+ 服务模式。本机回环接口仅用于窗口与后端之间的内部通信，不对外暴露。
+ .
+ 包内附带 Android SDK Platform Tools 的 adb 37.0.1，可直接使用无线配对，
+ 不要求系统预装 android-sdk-platform-tools；使用 --window=none 可在
+ 无图形会话中以纯服务模式运行。

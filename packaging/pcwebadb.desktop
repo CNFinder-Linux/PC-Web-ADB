@@ -1,0 +1,17 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=PC Web ADB (PWA)
+Name[zh_CN]=PC Web ADB (PWA) · ADB 设备管理
+GenericName=ADB Device Manager
+GenericName[zh_CN]=ADB 设备管理器
+Comment=Manage Android phones, tablets and TV boxes over WiFi ADB
+Comment[zh_CN]=通过 WiFi ADB 管理手机、平板、电视与盒子
+Exec=/usr/bin/pcwebadb
+Icon=pcwebadb
+Terminal=false
+Categories=Development;Utility;System;
+Keywords=adb;android;wireless debugging;scrcpy;
+StartupNotify=true
+StartupWMClass=PCWebADB
+SingleMainWindow=true

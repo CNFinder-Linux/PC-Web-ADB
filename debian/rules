@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+# Standalone debian/rules: no debhelper required.
+# The canonical build path is packaging/build-deb.sh (dpkg-deb only);
+# these targets make `dpkg-buildpackage -b -us -uc` work as well.
+SHELL := /bin/bash
+ROOT  := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
+
+build: build-arch build-indep
+
+build-arch:
+	$(ROOT)/packaging/build-deb.sh
+
+build-indep:
+
+binary: binary-arch binary-indep
+
+binary-arch: build-arch
+	cp $(ROOT)/dist/pcwebadb_*.deb $(ROOT)/../
+
+binary-indep:
+
+clean:
+	rm -rf $(ROOT)/packaging/root
+	rm -f $(ROOT)/dist/pcwebadb_*.deb
+
+.PHONY: build build-arch build-indep binary binary-arch binary-indep clean
